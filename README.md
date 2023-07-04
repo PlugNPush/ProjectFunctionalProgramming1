@@ -1,5 +1,15 @@
 # Class Exam Instruction: Sudoku Solver in Scala
 
+## sbt project compiled with Scala 3
+
+### Usage
+
+This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
+
+For more information on the sbt-dotty plugin, see the
+[scala3-example-project](https://github.com/scala/scala3-example-project/blob/main/README.md).
+
+
 ## Topic
 
 Write a Sudoku solver in Scala 3 using [ZIO](https://zio.dev/overview/getting-started), a purely functional, type-safe, composable library for asynchronous, concurrent programming in Scala. You will find useful to use additional libraries from the ZIP ecosystem, such as [`zio-nio`](https://zio.dev/zio-nio/) and [`zio-json`](https://zio.dev/zio-json/).
