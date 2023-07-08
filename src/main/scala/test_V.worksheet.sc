@@ -28,10 +28,15 @@ case class Sudoku(
   sudoku: Map[String, List[List[Option[Int]]]]
 )
 
+case class Sudoku_traitment(
+  sudoku: Either[String, Seq[(String, List[List[Option[Int]]])]]
+)
+
 // we create a parser for the JSON file
 val parser = DeriveJsonDecoder.gen[Sudoku]
 // sort the result by the key in ascending order
 val result = parser.decodeJson(json).map(_.sudoku.toSeq.sortBy(_._1.toInt))
+print(result)
 
 // show the result with design and getorelse with default value '0'
 // we want to obtain a result like this :
@@ -106,20 +111,17 @@ result2 match {
 // Right(List(List(Some(9), None, None), List(None, Some(1), Some(5)), List(None, None, Some(8)), List(None, Some(7), None), List(None, Some(2), None), List(Some(6), None, None), List(Some(3), None, None), List(None, Some(4), Some(6)), List(Some(2), Some(5), None), List(Some(4), Some(6), None), List(None, Some(7), Some(9)), List(None, None, None), List(Some(1), Some(8), Some(2)), List(None, None, None), List(Some(9), Some(3), Some(7)), List(None, None, None), List(Some(8), Some(3), None), List(None, Some(6), Some(2)), List(None, Some(3), Some(7)), List(Some(1), Some(8), None), List(None, None, Some(4)), List(None, None, Some(1)), List(None, Some(5), None), List(None, Some(6), None), List(Some(5), None, None), List(Some(6), Some(9), None), List(None, None, Some(3))))
 
 // so we need to group the result by 3 and then add a key to each list :
-val result3 = result2.map(_.grouped(3).toList).map(_.zipWithIndex.map(_.swap))
 // i have Either[String, List[(Int, Seq[List[Option[Int]]])]]
 // i want Map[String, List[List[Option[Int]]]]
-
-case class SudokuJson(grid: Map[String, List[List[Option[Int]]]])
 
 // we transform the result3 to a JSON format :
     // DeriveJsonDecoder.gen[Sudoku] then parser.decodeJson(json) // to decode a JSON
     // DeriveJsonEncoder.gen[Sudoku] then parser.encodeJson(sudoku) // to encode a JSON
-val parser2 = DeriveJsonEncoder.gen[Sudoku]
-//val result4 = parser2.encodeJson(result3)
+val parser2 = DeriveJsonEncoder.gen[Either[String, Seq[(String, List[List[Option[Int]]])]]]
+val result4 = parser2.encodeJson(result)
 
 // i can now write the result in a JSON file :
 import java.io._
 val pw = new PrintWriter(new File("grids/result/1.json" ))
-pw.write(result3.toString)
+pw.write(result4.toString)
 pw.close
