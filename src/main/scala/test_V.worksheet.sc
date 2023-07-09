@@ -161,3 +161,41 @@ def exportSudokuToJson(sudoku: Sudoku, filePath: String): Unit = {
 }
 
 exportSudokuToJson(solvedSudoku.getOrElse(Sudoku(Nil)), s"grids/result/${json_file}.json")
+
+
+// 5. Generate a new Sudoku
+
+import scala.util.Random
+
+def generateSudoku(): (Sudoku, Sudoku) = {
+  val emptySudoku = Sudoku(List.fill(9)(List.fill(9)(None)))
+
+  val solution = solveSudoku(emptySudoku).getOrElse(emptySudoku)
+
+  val random = new Random()
+
+  val filledCells = random.nextInt(17) + 17 // Generate a random number between 17 and 33
+  var count = 0
+
+  val sudokuWithHints = emptySudoku.copy(sudoku = solution.sudoku.map(row =>
+    row.map(cell => {
+      if (count < filledCells && random.nextBoolean()) {
+        count += 1
+        cell
+      } else {
+        None
+      }
+    })
+  ))
+
+  (sudokuWithHints, solution)
+}
+
+val (sudokuWithHints, solution) = generateSudoku()
+
+println("Sudoku avec des indices :")
+printSudoku(sudokuWithHints)
+
+println("Solution du Sudoku :")
+printSudoku(solution)
+
