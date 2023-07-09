@@ -2,11 +2,29 @@
 // 1. Read the JSON file
 // we start by importing the JSON library with ZIO
 import zio.json._
+import java.io._
 
-// we read the file from grids/input/1.json
-val json = scala.io.Source.fromFile("grids/input/1.json").mkString
+case class Sudoku(
+  sudoku: List[List[Option[Int]]]
+)
 
-/* //we have :
+def importSudokuFromJson(filePath: String): Option[Sudoku] = {
+  val json = scala.io.Source.fromFile(filePath).mkString // we read the file
+
+  // we create a parser for the JSON file
+  val parser = DeriveJsonDecoder.gen[Sudoku]
+  val result = parser.decodeJson(json).getOrElse(Sudoku(Nil))
+  
+  Some(result)
+}
+
+val json_file = 1
+val filePath = s"grids/input/${json_file}.json"
+
+val importedSudoku = importSudokuFromJson(filePath).getOrElse(Sudoku(Nil))
+
+//we have in the json :
+/*
 json: String = {
   "sudoku": [
     [9, null, null, null, 7, null, 3, null, null],
@@ -22,19 +40,9 @@ json: String = {
 }
 */
 
-// 2. Create a parser for the JSON file
- 
-case class Sudoku(
-  sudoku: List[List[Option[Int]]]
-)
+// 2. Print the sudoku
 
-// we create a parser for the JSON file
-val parser = DeriveJsonDecoder.gen[Sudoku]
-// sort the result by the key in ascending order
-val result = parser.decodeJson(json).getOrElse(Sudoku(Nil))
-print(result)
-
-// show the result with design and getorelse with default value '0'
+// show the importedSudoku with design and getorelse with default value '0'
 // we want to obtain a result like this :
 /*
 +-------+-------+-------+
@@ -52,7 +60,7 @@ print(result)
 +-------+-------+-------+
 */
 // and we have :
-// Right(Sudoku(List(List(Some(9), None, None, None, Some(7), None, Some(3), None, None), List(None, Some(1), Some(5), None, Some(2), None, None, Some(4), Some(6)), List(None, None, Some(8), Some(6), None, None, Some(2), Some(5), None), List(Some(4), Some(6), None, Some(1), Some(8), Some(2), None, None, None), List(None, Some(7), Some(9), None, None, None, Some(8), Some(3), None), List(None, None, None, Some(9), Some(3), Some(7), None, Some(6), Some(2)), List(None, Some(3), Some(7), None, None, Some(1), Some(5), None, None), List(Some(1), Some(8), None, None, Some(5), None, Some(6), Some(9), None), List(None, None, Some(4), None, Some(6), None, None, None, Some(3)))))
+// Sudoku(List(List(Some(9), None, None, None, Some(7), None, Some(3), None, None), List(None, Some(1), Some(5), None, Some(2), None, None, Some(4), Some(6)), List(None, None, Some(8), Some(6), None, None, Some(2), Some(5), None), List(Some(4), Some(6), None, Some(1), Some(8), Some(2), None, None, None), List(None, Some(7), Some(9), None, None, None, Some(8), Some(3), None), List(None, None, None, Some(9), Some(3), Some(7), None, Some(6), Some(2)), List(None, Some(3), Some(7), None, None, Some(1), Some(5), None, None), List(Some(1), Some(8), None, None, Some(5), None, Some(6), Some(9), None), List(None, None, Some(4), None, Some(6), None, None, None, Some(3))))
 
 def printSudoku(sudoku: Sudoku): Unit = {
   val rows = sudoku.sudoku
@@ -77,16 +85,79 @@ def printSudoku(sudoku: Sudoku): Unit = {
   println("+-------+-------+-------+")
 }
 
-printSudoku(result)
+printSudoku(importedSudoku)
+
+// 3. Resolve the sudoku
+
+//import scala.util.boundary, boundary.break <- need to use this instead of return
+
+def solveSudoku(sudoku: Sudoku): Option[Sudoku] = {
+  def isValid(sudoku: Sudoku, row: Int, col: Int, num: Int): Boolean = {
+    // Check if the number is already present in the same row
+    for (c <- 0 until 9) {
+      if (sudoku.sudoku(row)(c).contains(num))
+        return false
+    }
+
+    // Check if the number is already present in the same column
+    for (r <- 0 until 9) {
+      if (sudoku.sudoku(r)(col).contains(num))
+        return false
+    }
+
+    // Check if the number is already present in the same square
+    val regionRow = 3 * (row / 3)
+    val regionCol = 3 * (col / 3)
+    for (r <- 0 until 3) {
+      for (c <- 0 until 3) {
+        if (sudoku.sudoku(regionRow + r)(regionCol + c).contains(num))
+          return false
+      }
+    }
+
+    true
+  }
+
+  def solve(sudoku: Sudoku, row: Int, col: Int): Option[Sudoku] = {
+    if (row == 9)
+      return Some(sudoku) // Sudoku resolved
+
+    if (col == 9)
+      return solve(sudoku, row + 1, 0)
+
+    val cell = sudoku.sudoku(row)(col)
+    cell match {
+      case Some(value) => solve(sudoku, row, col + 1) // Case already fill, go to the next case
+      case None =>
+        for (num <- 1 to 9) {
+          if (isValid(sudoku, row, col, num)) {
+            val newSudoku = sudoku.copy(sudoku = sudoku.sudoku.updated(row, sudoku.sudoku(row).updated(col, Some(num))))
+            val result = solve(newSudoku, row, col + 1)
+            if (result.isDefined)
+              return result
+          }
+        }
+        None // None valid value find, comeback
+    }
+  }
+
+  solve(sudoku, 0, 0)
+}
+
+val solvedSudoku = solveSudoku(importedSudoku)
+solvedSudoku.foreach(printSudoku)
 
 
-// 3. Create a reverse parser into a JSON file
+// 4. Create a reverse parser into a JSON file
 
-val parser2 = DeriveJsonEncoder.gen[Sudoku]
-val result2 = parser2.encodeJson(result)
+def exportSudokuToJson(sudoku: Sudoku, filePath: String): Unit = {
+  val encoder = DeriveJsonEncoder.gen[Sudoku]
+  val json = encoder.encodeJson(sudoku)
+  val jsonString = json.toString
 
-// i can now write the result in a JSON file :
-import java.io._
-val pw = new PrintWriter(new File("grids/result/1.json" ))
-pw.write(result2.toString)
-pw.close
+  val pw = new PrintWriter(new File(filePath))
+  pw.write(jsonString)
+  pw.close()
+}
+
+exportSudokuToJson(solvedSudoku.getOrElse(Sudoku(Nil)), s"grids/result/${json_file}.json")
