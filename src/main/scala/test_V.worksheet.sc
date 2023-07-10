@@ -62,6 +62,62 @@ json: String = {
 // and we have :
 // Sudoku(List(List(Some(9), None, None, None, Some(7), None, Some(3), None, None), List(None, Some(1), Some(5), None, Some(2), None, None, Some(4), Some(6)), List(None, None, Some(8), Some(6), None, None, Some(2), Some(5), None), List(Some(4), Some(6), None, Some(1), Some(8), Some(2), None, None, None), List(None, Some(7), Some(9), None, None, None, Some(8), Some(3), None), List(None, None, None, Some(9), Some(3), Some(7), None, Some(6), Some(2)), List(None, Some(3), Some(7), None, None, Some(1), Some(5), None, None), List(Some(1), Some(8), None, None, Some(5), None, Some(6), Some(9), None), List(None, None, Some(4), None, Some(6), None, None, None, Some(3))))
 
+
+def throwableVerifySudoku(sudoku: Sudoku): Unit = {
+    val rows = sudoku.sudoku
+
+    // Check if the sudoku has 9 rows
+    if (rows.length != 9)
+      throw new Exception("The sudoku does not have 9 rows")
+
+    // Check if the sudoku has 9 columns for each row
+    if (rows.exists(row => row.length != 9))
+      throw new Exception("The sudoku does not have 9 columns for each row")
+
+    // Check if the sudoku has only numbers between 1 and 9, or None
+    if (rows.exists(row => row.exists(cell => cell.exists(value => value < 1 || value > 9))))
+      throw new Exception("The sudoku has a number that is not between 1 and 9, or None")
+
+    // Check for each line that the numbers are unique, except for None from 1 to 9
+    if ((0 until 9).exists(row => 
+      rows(row)
+        .filter(_.isDefined) // Filter out None values
+        .groupBy(cell => cell)
+        .view
+        .mapValues(_.size)
+        .exists(_._2 > 1)))
+      throw new Exception("The sudoku has a number that is not unique in a line")
+
+
+    // Check for each column that the numbers are unique, except for None from 1 to 9
+    if ((0 until 9).exists(col => 
+      rows
+        .map(_(col)) // Get the column
+        .filter(_.isDefined) // Filter out None values
+        .groupBy(cell => cell)
+        .view
+        .mapValues(_.size)
+        .exists(_._2 > 1)))
+      throw new Exception("The sudoku has a number that is not unique in a column")
+
+
+    // Check for each square that the numbers are unique, except for None from 1 to 9
+    if ((0 until 9).exists(square => {
+      val regionRow = 3 * (square / 3)
+      val regionCol = 3 * (square % 3)
+      val region = (for {
+        r <- 0 until 3
+        c <- 0 until 3
+      } yield (regionRow + r, regionCol + c)).map { case (r, c) => rows(r)(c) }
+      region.filter(_.isDefined).groupBy(cell => cell).view.mapValues(_.size).exists(_._2 > 1)
+    }))
+      throw new Exception("The sudoku has a number that is not unique in a square")
+    
+  }
+
+val status = throwableVerifySudoku(importedSudoku)
+println("Verification done, the sudoku is valid")
+
 def printSudoku(sudoku: Sudoku): Unit = {
   val rows = sudoku.sudoku
 
@@ -93,53 +149,47 @@ printSudoku(importedSudoku)
 
 def solveSudoku(sudoku: Sudoku): Option[Sudoku] = {
   def isValid(sudoku: Sudoku, row: Int, col: Int, num: Int): Boolean = {
+
     // Check if the number is already present in the same row
-    for (c <- 0 until 9) {
-      if (sudoku.sudoku(row)(c).contains(num))
+    if ((0 until 9).exists(c => sudoku.sudoku(row)(c).contains(num)))
         return false
-    }
 
     // Check if the number is already present in the same column
-    for (r <- 0 until 9) {
-      if (sudoku.sudoku(r)(col).contains(num))
+    if ((0 until 9).exists(r => sudoku.sudoku(r)(col).contains(num)))
         return false
-    }
 
     // Check if the number is already present in the same square
     val regionRow = 3 * (row / 3)
     val regionCol = 3 * (col / 3)
-    for (r <- 0 until 3) {
-      for (c <- 0 until 3) {
-        if (sudoku.sudoku(regionRow + r)(regionCol + c).contains(num))
-          return false
-      }
-    }
+    if ((for {
+      r <- 0 until 3
+      c <- 0 until 3
+    } yield (regionRow + r, regionCol + c)).exists { case (r, c) => sudoku.sudoku(r)(c).contains(num) })
+        return false
 
     true
-  }
+}
 
   def solve(sudoku: Sudoku, row: Int, col: Int): Option[Sudoku] = {
     if (row == 9)
-      return Some(sudoku) // Sudoku resolved
-
-    if (col == 9)
-      return solve(sudoku, row + 1, 0)
-
-    val cell = sudoku.sudoku(row)(col)
-    cell match {
+      Some(sudoku) // Sudoku resolved
+    else if (col == 9)
+      solve(sudoku, row + 1, 0)
+    else sudoku.sudoku(row)(col) match {
       case Some(value) => solve(sudoku, row, col + 1) // Case already fill, go to the next case
       case None =>
-        for (num <- 1 to 9) {
-          if (isValid(sudoku, row, col, num)) {
-            val newSudoku = sudoku.copy(sudoku = sudoku.sudoku.updated(row, sudoku.sudoku(row).updated(col, Some(num))))
-            val result = solve(newSudoku, row, col + 1)
-            if (result.isDefined)
-              return result
-          }
-        }
-        None // None valid value find, comeback
+        (1 to 9) // Range from 1 to 9
+          .view // Lazy evaluation
+          .map(num => if (isValid(sudoku, row, col, num)) { // We map to num and check if the number is valid
+            val newSudoku = sudoku.copy(sudoku = sudoku.sudoku.updated(row, sudoku.sudoku(row).updated(col, Some(num)))) // Num is valid, we update the sudoku with it
+            solve(newSudoku, row, col + 1) // We recursively call the function to continue to solve the sudoku for the next column
+          } else None) // If num is not valid, we return None
+          .find(_.isDefined) // We find the first defined value, or return None
+          .flatten // We flatten the Option[Option[Sudoku]] to Option[Sudoku]
+          .orElse(None) // We return None if no value is found after the flatten
     }
-  }
+}
+
 
   solve(sudoku, 0, 0)
 }
@@ -192,6 +242,10 @@ def generateSudoku(): (Sudoku, Sudoku) = {
 }
 
 val (sudokuWithHints, solution) = generateSudoku()
+
+println("Vérification du Sudoku avec des indices :")
+throwableVerifySudoku(sudokuWithHints)
+println("Vérification effectuée, le sudoku est valide")
 
 println("Sudoku avec des indices :")
 printSudoku(sudokuWithHints)
