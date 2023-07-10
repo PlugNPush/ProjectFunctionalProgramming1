@@ -27,31 +27,37 @@ All the tests should succeed before attempting to run the program. Make sure you
 When running the tests, you should see all the following lines in green from your terminal.
 ```text
 sbt:sudoku-solver> test
+[info] compiling 1 Scala source to /Users/plugn/Downloads/ProjectFunctionalProgramming1/sudoku-solver/target/scala-3.3.0/classes ...
 [info] compiling 1 Scala source to /Users/plugn/Downloads/ProjectFunctionalProgramming1/sudoku-solver/target/scala-3.3.0/test-classes ...
-
 sudoku.MySuite:
-  + Solve a sudoku #1 should succeed 0.045s
-  + Solve a sudoku #2 should succeed 0.003s
-  + Solve a sudoku #3 should succeed 0.076s
-  + Solve a sudoku #4 should succeed 0.004s
-  + Solve a sudoku #5 should succeed 0.002s
-  + Comparing sudoku #1 resolution against test #5 should not be equal 0.001s
-  + Loading an inexistent sudoku should throw an exception 0.0s
+  + Solve a sudoku #1 should succeed 0.098s
+  + Solve a sudoku #2 should succeed 0.009s
+  + Solve a sudoku #3 should succeed 0.127s
+  + Solve a sudoku #4 should succeed 0.006s
+  + Solve a sudoku #5 should succeed 0.003s
+  + Solve a sudoku #6 should succeed 0.011s
+  + Solve a sudoku #7 should succeed 0.026s
+  + Solve a sudoku #8 should succeed 0.018s
+  + Comparing sudoku #1 resolution against test #5 should not be equal 0.002s
+  + Loading an inexistent sudoku should throw an exception 0.001s
   + Sudoku inv_1 should be invalid (empty due to invalid json object name) 0.001s
-  + Sudoku inv_2 should be invalid (row size mismatch) 0.0s
-  + Sudoku inv_3 should be invalid (column size mismatch) 0.0s
+  + Sudoku inv_2 should be invalid (row size mismatch) 0.001s
+  + Sudoku inv_3 should be invalid (column size mismatch) 0.001s
   + Sudoku inv_4 should be invalid (content values outside bounds 1-9) 0.001s
   + Sudoku inv_5 should be invalid (duplicate in row) 0.0s
-  + Sudoku inv_6 should be invalid (duplicate in column) 0.0s
+  + Sudoku inv_6 should be invalid (duplicate in column) 0.003s
   + Sudoku inv_7 should be invalid (duplicate in square) 0.001s
-  + Sudoku inv_8 should be invalid (empty due invalid character) 0.0s
-  + Saving the solution from sudoku #1 should succeed 0.023s
-  + Saving the solution from sudoku #2 should succeed 0.002s
-  + Saving the solution from sudoku #3 should succeed 0.082s
-  + Saving the solution from sudoku #4 should succeed 0.003s
-  + Saving the solution from sudoku #5 should succeed 0.002s
-[info] Passed: Total 20, Failed 0, Errors 0, Passed 20
-[success] Total time: 1 s, completed Jul 10, 2023, 3:43:05 AM
+  + Sudoku inv_8 should be invalid (empty due invalid character) 0.002s
+  + Saving the solution from sudoku #1 should succeed 0.028s
+  + Saving the solution from sudoku #2 should succeed 0.004s
+  + Saving the solution from sudoku #3 should succeed 0.053s
+  + Saving the solution from sudoku #4 should succeed 0.004s
+  + Saving the solution from sudoku #5 should succeed 0.003s
+  + Saving the solution from sudoku #6 should succeed 0.005s
+  + Saving the solution from sudoku #7 should succeed 0.009s
+  + Saving the solution from sudoku #8 should succeed 0.007s
+[info] Passed: Total 26, Failed 0, Errors 0, Passed 26
+[success] Total time: 6 s, completed Jul 10, 2023, 1:56:09 PM
 sbt:sudoku-solver> 
 ```
 You can also check that the current build of the project is operational by going to the Actions tab of the GitHub repository and monitor the GitHub CI Action for Scala. Every time a modification is being pushed to the GitHub repository, an automated CI pipeline runs the tests and reports on the results. The current build status is: ![current tests status](https://github.com/plugnpush/projectfunctionalprogramming1/actions/workflows/scala.yml/badge.svg).
