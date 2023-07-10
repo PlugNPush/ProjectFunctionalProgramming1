@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Scala CI
+name: Scala Tests CI (JDK 17 via sbt)
 
 on:
   push:
