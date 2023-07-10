@@ -12,6 +12,19 @@ object Main extends ZIOAppDefault {
     sudoku: List[List[Option[Int]]]
   )
 
+  case class SudokuImportFailure(message: String) extends Exception(message)
+  case class SudokuExportFailure(message: String) extends Exception(message)
+  case class SudokuSolveError(message: String) extends Exception(message)
+  
+  abstract class InvalidSudoku(message: String) extends Exception(message)
+  case class EmptySudoku(message: String) extends InvalidSudoku(message)
+  case class InvalidSudokuRowSize(message: String) extends InvalidSudoku(message)
+  case class InvalidSudokuColumnSize(message: String) extends InvalidSudoku(message)
+  case class InvalidSudokuContent(message: String) extends InvalidSudoku(message)
+  case class InvalidSudokuLine(message: String) extends InvalidSudoku(message)
+  case class InvalidSudokuColumn(message: String) extends InvalidSudoku(message)
+  case class InvalidSudokuSquare(message: String) extends InvalidSudoku(message)
+
   def importSudokuFromJson(filePath: String): Option[Sudoku] = {
     try {
       val json = scala.io.Source.fromFile(filePath).mkString // we read the file
@@ -22,7 +35,7 @@ object Main extends ZIOAppDefault {
 
       Some(result)
     } catch {
-      case e: Exception => throw new Exception(s"Error while importing the sudoku from the json file (does the file exists?): ${e}"); None
+      case e: Exception => throw new SudokuImportFailure(s"Error while importing the sudoku from the json file (does the file exists?): ${e.getMessage()}"); None
     }
     
   }
@@ -31,19 +44,19 @@ object Main extends ZIOAppDefault {
     val rows = sudoku.sudoku
 
     if (rows.isEmpty)
-      throw new Exception("The sudoku property is empty or inexistent, are you sure you imported the right JSON file?")
+      throw new EmptySudoku("The sudoku property is empty or inexistent, are you sure you imported the right JSON file? (the JSON parser likely failed to comply with Sodoku type)")
 
     // Check if the sudoku has 9 rows
     if (rows.length != 9)
-      throw new Exception("The sudoku does not have 9 rows")
+      throw new InvalidSudokuRowSize("The sudoku does not have 9 rows")
 
     // Check if the sudoku has 9 columns for each row
     if (rows.exists(row => row.length != 9))
-      throw new Exception("The sudoku does not have 9 columns for each row")
+      throw new InvalidSudokuColumnSize("The sudoku does not have 9 columns for each row")
 
     // Check if the sudoku has only numbers between 1 and 9, or None
     if (rows.exists(row => row.exists(cell => cell.exists(value => value < 1 || value > 9))))
-      throw new Exception("The sudoku has a number that is not between 1 and 9, or None")
+      throw new InvalidSudokuContent("The sudoku has a number that is not between 1 and 9, or None")
 
     // Check for each line that the numbers are unique, except for None from 1 to 9
     if ((0 until 9).exists(row => 
@@ -53,7 +66,7 @@ object Main extends ZIOAppDefault {
         .view
         .mapValues(_.size)
         .exists(_._2 > 1)))
-      throw new Exception("The sudoku has a number that is not unique in a line")
+      throw new InvalidSudokuLine("The sudoku has a number that is not unique in a line")
 
 
     // Check for each column that the numbers are unique, except for None from 1 to 9
@@ -65,7 +78,7 @@ object Main extends ZIOAppDefault {
         .view
         .mapValues(_.size)
         .exists(_._2 > 1)))
-      throw new Exception("The sudoku has a number that is not unique in a column")
+      throw new InvalidSudokuColumn("The sudoku has a number that is not unique in a column")
 
 
     // Check for each square that the numbers are unique, except for None from 1 to 9
@@ -78,7 +91,7 @@ object Main extends ZIOAppDefault {
       } yield (regionRow + r, regionCol + c)).map { case (r, c) => rows(r)(c) }
       region.filter(_.isDefined).groupBy(cell => cell).view.mapValues(_.size).exists(_._2 > 1)
     }))
-      throw new Exception("The sudoku has a number that is not unique in a square")
+      throw new InvalidSudokuSquare("The sudoku has a number that is not unique in a square")
       
 
     true
@@ -155,13 +168,17 @@ object Main extends ZIOAppDefault {
   }
 
   def exportSudokuToJson(sudoku: Sudoku, filePath: String) = {
-    val encoder = DeriveJsonEncoder.gen[Sudoku]
-    val json = encoder.encodeJson(sudoku)
-    val jsonString = json.toString
+    try {
+      val encoder = DeriveJsonEncoder.gen[Sudoku]
+      val json = encoder.encodeJson(sudoku)
+      val jsonString = json.toString
 
-    val pw = new PrintWriter(new File(filePath))
-    pw.write(jsonString)
-    pw.close()
+      val pw = new PrintWriter(new File(filePath))
+      pw.write(jsonString)
+      pw.close()
+    } catch {
+      case e: Exception => throw new SudokuExportFailure(s"Error while exporting the Sudoku to the JSON file: ${e.getMessage}")
+    }
 }
 
   def run: ZIO[Any, Throwable, Unit] =
@@ -177,7 +194,7 @@ object Main extends ZIOAppDefault {
       filePath = s"grids/input/${path}"
       _ <- Console.printLine(s"Checking file: $filePath")
 
-      importedSudoku = importSudokuFromJson(filePath).getOrElse(throw new Exception("Error while importing the Sudoku from the JSON file"))
+      importedSudoku = importSudokuFromJson(filePath).getOrElse(throw new SudokuImportFailure("Error while importing the Sudoku from the JSON file"))
       _ <- Console.printLine("Sudoku imported successfully")
 
       _ <- Console.printLine("Checking the Sudoku for validity")
@@ -189,7 +206,7 @@ object Main extends ZIOAppDefault {
 
       _ <- Console.printLine("Solving the Sudoku")
       start = Instant.now().toEpochMilli()
-      solvedSudoku = solveSudoku(importedSudoku).getOrElse(throw new Exception("Error while solving the Sudoku (is it solvable?)"))
+      solvedSudoku = solveSudoku(importedSudoku).getOrElse(throw new SudokuSolveError("Error while solving the Sudoku (is it solvable?)"))
       end = Instant.now().toEpochMilli()
       time = end - start
       _ <- Console.printLine(s"Sudoku solved in $time ms")
