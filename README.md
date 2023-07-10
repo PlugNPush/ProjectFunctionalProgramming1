@@ -74,7 +74,7 @@ The following structure is required:
 }
 ```
 Each line of your grid is represented in an array, and all of them are a component of a grid array named "sudoku".
-All the empty values should be set with null. DO NOT SET ZEROES AS THE GRID WILL FAIL THE VALIDITY TESTS.
+All the empty values should be set with null. <b>DO NOT SET ZEROES AS THE GRID WILL FAIL THE VALIDITY TESTS, even though the empty values will be represented by zeroes when being printed on the screen.</b>
 
 When you run the project, you will be prompted using the ZIO console to enter the filename.
 If your file is saved in ./grids/input/32.json, you should type 32.json and press enter.
