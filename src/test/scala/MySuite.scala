@@ -44,6 +44,30 @@ class MySuite extends munit.FunSuite {
     assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
   }
 
+  test("Solve a sudoku #6 should succeed") {
+    val sudoku = Main.importSudokuFromJson("grids/input/6.json").getOrElse(fail("Could not import sudoku"))
+    Main.throwableVerifySudoku(sudoku)
+    val solvedSudoku = Main.solveSudoku(sudoku).getOrElse(fail("Could not solve sudoku"))
+    val actualSolution = Main.importSudokuFromJson("grids/test/6.json").getOrElse(fail("Could not import solution"))
+    assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
+  }
+
+  test("Solve a sudoku #7 should succeed") {
+    val sudoku = Main.importSudokuFromJson("grids/input/7.json").getOrElse(fail("Could not import sudoku"))
+    Main.throwableVerifySudoku(sudoku)
+    val solvedSudoku = Main.solveSudoku(sudoku).getOrElse(fail("Could not solve sudoku"))
+    val actualSolution = Main.importSudokuFromJson("grids/test/7.json").getOrElse(fail("Could not import solution"))
+    assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
+  }
+
+  test("Solve a sudoku #8 should succeed") {
+    val sudoku = Main.importSudokuFromJson("grids/input/8.json").getOrElse(fail("Could not import sudoku"))
+    Main.throwableVerifySudoku(sudoku)
+    val solvedSudoku = Main.solveSudoku(sudoku).getOrElse(fail("Could not solve sudoku"))
+    val actualSolution = Main.importSudokuFromJson("grids/test/8.json").getOrElse(fail("Could not import solution"))
+    assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
+  }
+
   test("Comparing sudoku #1 resolution against test #5 should not be equal") {
     val sudoku = Main.importSudokuFromJson("grids/input/1.json").getOrElse(fail("Could not import sudoku"))
     Main.throwableVerifySudoku(sudoku)
@@ -160,6 +184,36 @@ class MySuite extends munit.FunSuite {
     val solvedSudoku = Main.solveSudoku(sudoku).getOrElse(fail("Could not solve sudoku"))
     Main.exportSudokuToJson(solvedSudoku, "grids/result/5.json")
     val actualSolution = Main.importSudokuFromJson("grids/result/5.json").getOrElse(fail("Could not import solution"))
+    Main.throwableVerifySudoku(actualSolution)
+    assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
+  }
+
+   test("Saving the solution from sudoku #6 should succeed") {
+    val sudoku = Main.importSudokuFromJson("grids/input/6.json").getOrElse(fail("Could not import sudoku"))
+    Main.throwableVerifySudoku(sudoku)
+    val solvedSudoku = Main.solveSudoku(sudoku).getOrElse(fail("Could not solve sudoku"))
+    Main.exportSudokuToJson(solvedSudoku, "grids/result/6.json")
+    val actualSolution = Main.importSudokuFromJson("grids/result/6.json").getOrElse(fail("Could not import solution"))
+    Main.throwableVerifySudoku(actualSolution)
+    assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
+  }
+
+  test("Saving the solution from sudoku #7 should succeed") {
+    val sudoku = Main.importSudokuFromJson("grids/input/7.json").getOrElse(fail("Could not import sudoku"))
+    Main.throwableVerifySudoku(sudoku)
+    val solvedSudoku = Main.solveSudoku(sudoku).getOrElse(fail("Could not solve sudoku"))
+    Main.exportSudokuToJson(solvedSudoku, "grids/result/7.json")
+    val actualSolution = Main.importSudokuFromJson("grids/result/7.json").getOrElse(fail("Could not import solution"))
+    Main.throwableVerifySudoku(actualSolution)
+    assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
+  }
+
+   test("Saving the solution from sudoku #8 should succeed") {
+    val sudoku = Main.importSudokuFromJson("grids/input/8.json").getOrElse(fail("Could not import sudoku"))
+    Main.throwableVerifySudoku(sudoku)
+    val solvedSudoku = Main.solveSudoku(sudoku).getOrElse(fail("Could not solve sudoku"))
+    Main.exportSudokuToJson(solvedSudoku, "grids/result/8.json")
+    val actualSolution = Main.importSudokuFromJson("grids/result/8.json").getOrElse(fail("Could not import solution"))
     Main.throwableVerifySudoku(actualSolution)
     assertEquals(solvedSudoku.sudoku, actualSolution.sudoku)
   }
