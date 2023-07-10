@@ -185,17 +185,17 @@ sbt:sudoku-solver>
 
 # List of the exceptions in the Sudoku Solver
 
-Here are all the exception possibilities:
-  - Error while importing the sudoku from the json file (does the file exists?) <Disk I/O Exception>
-  - Error while importing the Sudoku from the JSON file <Unknown Exception>
-  - The sudoku property is empty or inexistent, are you sure you imported the right JSON file? (the JSON parser likely failed to comply with Sodoku type) <Unknown Exception>
-  - The sudoku does not have 9 rows <Invalid Grid Exception>
-  - The sudoku does not have 9 columns for each row <Invalid Grid Exception>
-  - The sudoku has a number that is not between 1 and 9, or None <Invalid Grid Exception>
-  - The sudoku has a number that is not unique in a line <Invalid Grid Exception>
-  - The sudoku has a number that is not unique in a column <Invalid Grid Exception>
-  - The sudoku has a number that is not unique in a square <Invalid Grid Exception>
-  - Error while solving the Sudoku (is it solvable?) <Invalid Grid Exception>
-  - Error while exporting the Sudoku to the JSON file <Disk I/O Exception>
+Here are all the exception possibilities (they all extend Exception):
+  - Error while importing the sudoku from the json file (does the file exists?) (SudokuImportFailure, IOException)
+  - Error while importing the Sudoku from the JSON file (SudokuImportFailure)
+  - The sudoku property is empty or inexistent, are you sure you imported the right JSON file? (the JSON parser likely failed to comply with Sodoku type) (EmptySudoku, InvalidSudoku)
+  - The sudoku does not have 9 rows (InvalidSudokuRowSize, InvalidSudoku)
+  - The sudoku does not have 9 columns for each row (InvalidSudokuColumnSize, InvalidSudoku)
+  - The sudoku has a number that is not between 1 and 9, or None (InvalidSudokuContent, InvalidSudoku)
+  - The sudoku has a number that is not unique in a line (InvalidSudokuLine, InvalidSudoku)
+  - The sudoku has a number that is not unique in a column (InvalidSudokuColumn, InvalidSudoku)
+  - The sudoku has a number that is not unique in a square (InvalidSudokuSquare, InvalidSudoku)
+  - Error while solving the Sudoku (is it solvable?) (SudokuSolveError)
+  - Error while exporting the Sudoku to the JSON file (SudokuExportFailure, IOException)
 
 
