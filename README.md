@@ -2,6 +2,10 @@
 
 ![current tests status](https://github.com/plugnpush/projectfunctionalprogramming1/actions/workflows/scala.yml/badge.svg)
 
+# Team Members
+Vicent MARGUET, Logan LE LAY, Michaël NASS, Loïc TRÉHIN
+M1-SE2
+
 # Initialize
 
 If you open this project in VSCode, you can validate the import build and metal pop-up and then run the following command in the terminal:
