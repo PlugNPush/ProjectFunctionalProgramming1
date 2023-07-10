@@ -1,5 +1,7 @@
 # Class Exam Instruction: Sudoku Solver in Scala
 
+![current tests status](https://github.com/plugnpush/projectfunctionalprogramming1/actions/workflows/scala.yml/badge.svg)
+
 # Initialize
 
 If you open this project in VSCode, you can validate the import build and metal pop-up and then run the following command in the terminal:
@@ -17,6 +19,39 @@ sbt test
 sbt run
 ```
 All the tests should succeed before attempting to run the program. Make sure you included all the input and test grids from this repository in your copy of the project to allow the tests to run.
+
+# About the tests
+When running the tests, you should see all the following lines in green from your terminal.
+```text
+sbt:sudoku-solver> test
+[info] compiling 1 Scala source to /Users/plugn/Downloads/ProjectFunctionalProgramming1/sudoku-solver/target/scala-3.3.0/test-classes ...
+
+sudoku.MySuite:
+  + Solve a sudoku #1 should succeed 0.045s
+  + Solve a sudoku #2 should succeed 0.003s
+  + Solve a sudoku #3 should succeed 0.076s
+  + Solve a sudoku #4 should succeed 0.004s
+  + Solve a sudoku #5 should succeed 0.002s
+  + Comparing sudoku #1 resolution against test #5 should not be equal 0.001s
+  + Loading an inexistent sudoku should throw an exception 0.0s
+  + Sudoku inv_1 should be invalid (empty due to invalid json object name) 0.001s
+  + Sudoku inv_2 should be invalid (row size mismatch) 0.0s
+  + Sudoku inv_3 should be invalid (column size mismatch) 0.0s
+  + Sudoku inv_4 should be invalid (content values outside bounds 1-9) 0.001s
+  + Sudoku inv_5 should be invalid (duplicate in row) 0.0s
+  + Sudoku inv_6 should be invalid (duplicate in column) 0.0s
+  + Sudoku inv_7 should be invalid (duplicate in square) 0.001s
+  + Sudoku inv_8 should be invalid (empty due invalid character) 0.0s
+  + Saving the solution from sudoku #1 should succeed 0.023s
+  + Saving the solution from sudoku #2 should succeed 0.002s
+  + Saving the solution from sudoku #3 should succeed 0.082s
+  + Saving the solution from sudoku #4 should succeed 0.003s
+  + Saving the solution from sudoku #5 should succeed 0.002s
+[info] Passed: Total 20, Failed 0, Errors 0, Passed 20
+[success] Total time: 1 s, completed Jul 10, 2023, 3:43:05 AM
+sbt:sudoku-solver> 
+```
+You can also check that the current build of the project is operational by going to the Actions tab of the GitHub repository and monitor the GitHub CI Action for Scala. Every time a modification is being pushed to the GitHub repository, an automated CI pipeline runs the tests and reports on the results. The current build status is: ![current tests status](https://github.com/plugnpush/projectfunctionalprogramming1/actions/workflows/scala.yml/badge.svg).
 
 # How to use the Sudoku Solver
 
