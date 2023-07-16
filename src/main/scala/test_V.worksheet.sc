@@ -3,6 +3,7 @@
 // we start by importing the JSON library with ZIO
 import zio.json._
 import java.io._
+import scala.collection.mutable.Stack
 
 case class Sudoku(
   sudoku: List[List[Option[Int]]]
@@ -253,3 +254,57 @@ printSudoku(sudokuWithHints)
 println("Solution du Sudoku :")
 printSudoku(solution)
 
+
+def solveSudokuList(sudoku: Sudoku): List[Sudoku] = {
+  def isValid(sudoku: Sudoku, row: Int, col: Int, num: Int): Boolean = {
+    // Check if the number is already present in the same row
+    if ((0 until 9).exists(c => sudoku.sudoku(row)(c).contains(num)))
+      return false
+
+    // Check if the number is already present in the same column
+    if ((0 until 9).exists(r => sudoku.sudoku(r)(col).contains(num)))
+      return false
+
+    // Check if the number is already present in the same square
+    val regionRow = 3 * (row / 3)
+    val regionCol = 3 * (col / 3)
+    if ((for {
+      r <- 0 until 3
+      c <- 0 until 3
+    } yield (regionRow + r, regionCol + c)).exists { case (r, c) => sudoku.sudoku(r)(c).contains(num) })
+      return false
+
+    true
+  }
+
+  val stack = Stack(sudoku)
+  val solutions = Stack[Sudoku]()
+  
+  while (stack.nonEmpty && solutions.size < 2) {
+    val currentSudoku = stack.pop()
+    val emptyCell = currentSudoku.sudoku.flatten.zipWithIndex.find(_._1.isEmpty)
+
+    emptyCell match {
+      case Some((_, index)) =>
+        val (row, col) = (index / 9, index % 9)
+        for (num <- 1 to 9) {
+          if (isValid(currentSudoku, row, col, num)) {
+            val newSudoku = currentSudoku.copy(sudoku = currentSudoku.sudoku.updated(row, currentSudoku.sudoku(row).updated(col, Some(num))))
+            stack.push(newSudoku)
+          }
+        }
+      case None =>
+        solutions.push(currentSudoku)
+    }
+  }
+  
+  solutions.toList
+}
+
+val solutions = solveSudokuList(sudokuWithHints)
+val numberOfSolutions = solutions.size
+println(s"Nombre de solutions : $numberOfSolutions")
+
+solutions.foreach{solution =>
+  printSudoku(solution)
+}
